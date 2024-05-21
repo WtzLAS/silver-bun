@@ -24,66 +24,66 @@ namespace silverbun
 	inline API_WideCharToMultiByte pWCTMB = nullptr;
 
 	template <class T>
-	void SetPVM(T const pFunc)
+	inline void SetPVM(T const pFunc)
 	{
 		pPVM = reinterpret_cast<API_ProtectVirtualMemory>(pFunc);
 	}
 
 	template <class T>
-	void SetQVM(T const pFunc)
+	inline void SetQVM(T const pFunc)
 	{
 		pQVM = reinterpret_cast<API_QueryVirtualMemory>(pFunc);
 	}
 
 	template <class T>
-	void SetWCTMB(T const pFunc)
+	inline void SetWCTMB(T const pFunc)
 	{
 		pWCTMB = reinterpret_cast<API_WideCharToMultiByte>(pFunc);
 	}
 
-	bool CallPVM(void *const pAddress, const size_t nSize, const uint32_t nProtect, uint32_t *pOldProtect)
+	inline bool CallPVM(void *const pAddress, const size_t nSize, const uint32_t nProtect, uint32_t *pOldProtect)
 	{
 		return pPVM != nullptr ? pPVM(pAddress, nSize, nProtect, pOldProtect) : VirtualProtect(pAddress, nSize, nProtect, reinterpret_cast<DWORD *>(pOldProtect));
 	}
 
-	bool CallQVM(const void *const pAddress, MEMORY_BASIC_INFORMATION *const pBuf, const uint32_t nLen)
+	inline bool CallQVM(const void *const pAddress, MEMORY_BASIC_INFORMATION *const pBuf, const uint32_t nLen)
 	{
 		return pQVM != nullptr ? pQVM(pAddress, pBuf, nLen) : VirtualQuery(pAddress, pBuf, nLen);
 	}
 
-	int CallWCTMB(const uint32_t nCodePage, const uint32_t nFlags, const wchar_t *const wszInWideString, const int nSizeOfInString, char *szOutString, const int nSizeOfOutString, const char *const szDefaultChar, bool *const usedDefaultChar)
+	inline int CallWCTMB(const uint32_t nCodePage, const uint32_t nFlags, const wchar_t *const wszInWideString, const int nSizeOfInString, char *szOutString, const int nSizeOfOutString, const char *const szDefaultChar, bool *const usedDefaultChar)
 	{
 		return pWCTMB != nullptr ? pWCTMB(nCodePage, nFlags, wszInWideString, nSizeOfInString, szOutString, nSizeOfOutString, szDefaultChar, usedDefaultChar) : WideCharToMultiByte(nCodePage, nFlags, wszInWideString, nSizeOfInString, szOutString, nSizeOfOutString, szDefaultChar, reinterpret_cast<LPBOOL>(usedDefaultChar));
 	}
 #else
 	template <class T>
-	void SetPVM(T const pFunc)
+	inline void SetPVM(T const pFunc)
 	{
 		return;
 	}
 
 	template <class T>
-	void SetQVM(T const pFunc)
+	inline void SetQVM(T const pFunc)
 	{
 		return;
 	}
 	template <class T>
-	void SetWCTMB(T const pFunc)
+	inline void SetWCTMB(T const pFunc)
 	{
 		return;
 	}
 
-	bool CallPVM(void *const pAddress, const size_t nSize, const uint32_t nProtect, uint32_t *pOldProtect)
+	inline bool CallPVM(void *const pAddress, const size_t nSize, const uint32_t nProtect, uint32_t *pOldProtect)
 	{
 		return VirtualProtect(pAddress, nSize, nProtect, reinterpret_cast<DWORD *>(pOldProtect));
 	}
 
-	bool CallQVM(const void *const pAddress, MEMORY_BASIC_INFORMATION *const pBuf, const uint32_t nLen)
+	inline bool CallQVM(const void *const pAddress, MEMORY_BASIC_INFORMATION *const pBuf, const uint32_t nLen)
 	{
 		return VirtualQuery(pAddress, pBuf, nLen);
 	}
 
-	int CallWCTMB(const uint32_t nCodePage, const uint32_t nFlags, const wchar_t *const wszInWideString, const int nSizeOfInString, char *szOutString, const int nSizeOfOutString, const char *szDefaultChar, bool *usedDefaultChar)
+	inline int CallWCTMB(const uint32_t nCodePage, const uint32_t nFlags, const wchar_t *const wszInWideString, const int nSizeOfInString, char *szOutString, const int nSizeOfOutString, const char *szDefaultChar, bool *usedDefaultChar)
 	{
 		return WideCharToMultiByte(nCodePage, nFlags, wszInWideString, nSizeOfInString, szOutString, nSizeOfOutString, szDefaultChar, reinterpret_cast<LPBOOL>(usedDefaultChar));
 	}
@@ -173,7 +173,7 @@ namespace silverbun
 	constexpr uint32_t COL_SIG_REV = 0u;
 #endif // #if defined( _WIN64 )
 
-	static void HookVirtualMethod(const uintptr_t virtualTable, const void *const pHookMethod, const ptrdiff_t methodIndex, void **const ppOriginalMethod)
+	inline void HookVirtualMethod(const uintptr_t virtualTable, const void *const pHookMethod, const ptrdiff_t methodIndex, void **const ppOriginalMethod)
 	{
 		uint32_t nOldProt = 0u;
 
@@ -192,7 +192,7 @@ namespace silverbun
 		*ppOriginalMethod = reinterpret_cast<void *>(originalFunction);
 	}
 
-	static void HookImportedFunction(const uintptr_t pImportedMethod, const void *const pHookMethod, void **const ppOriginalMethod)
+	inline void HookImportedFunction(const uintptr_t pImportedMethod, const void *const pHookMethod, void **const ppOriginalMethod)
 	{
 		uint32_t nOldProt = 0u;
 
@@ -209,7 +209,7 @@ namespace silverbun
 		*ppOriginalMethod = reinterpret_cast<void *>(originalFunction);
 	}
 
-	static std::vector<uint8_t> LiteralToBytes(const char *const szInput)
+	inline std::vector<uint8_t> LiteralToBytes(const char *const szInput)
 	{
 		char *const pszPatternStart = const_cast<char *>(szInput);
 		const char *const pszPatternEnd = pszPatternStart + strlen(szInput);
@@ -223,7 +223,7 @@ namespace silverbun
 		return vBytes;
 	}
 
-	static std::vector<int> PatternToBytes(const char *const szInput)
+	inline std::vector<int> PatternToBytes(const char *const szInput)
 	{
 		char *const pszPatternStart = const_cast<char *>(szInput);
 		const char *const pszPatternEnd = pszPatternStart + strlen(szInput);
@@ -248,7 +248,7 @@ namespace silverbun
 		return vBytes;
 	}
 
-	static std::pair<std::vector<uint8_t>, std::string> PatternToMaskedBytes(const char *const szInput)
+	inline std::pair<std::vector<uint8_t>, std::string> PatternToMaskedBytes(const char *const szInput)
 	{
 		const char *pszPatternStart = const_cast<char *>(szInput);
 		const char *pszPatternEnd = pszPatternStart + strlen(szInput);
@@ -279,7 +279,7 @@ namespace silverbun
 		return make_pair(vBytes, svMask);
 	}
 
-	static std::vector<int> StringToBytes(const char *const szInput, bool bNullTerminator)
+	inline std::vector<int> StringToBytes(const char *const szInput, bool bNullTerminator)
 	{
 		const char *pszStringStart = const_cast<char *>(szInput);
 		const char *pszStringEnd = pszStringStart + strlen(szInput);
@@ -298,7 +298,7 @@ namespace silverbun
 		return vBytes;
 	}
 
-	static std::pair<std::vector<uint8_t>, std::string> StringToMaskedBytes(const char *const szInput, bool bNullTerminator)
+	inline std::pair<std::vector<uint8_t>, std::string> StringToMaskedBytes(const char *const szInput, bool bNullTerminator)
 	{
 		const char *pszStringStart = const_cast<char *>(szInput);
 		const char *pszStringEnd = pszStringStart + strlen(szInput);
