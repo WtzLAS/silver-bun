@@ -532,11 +532,13 @@ public:
 		CallPVM(reinterpret_cast<void *>(ptr), nSize, nOldProt, &nOldProt);
 	}
 
-	void PatchLiteral(const char *const szString) const {
+	void PatchLiteral(const char *const szString) const
+	{
 		PatchBytes(silverbun::LiteralToBytes(szString));
 	}
 
-	void NOP(const size_t nSize) const {
+	void NOP(const size_t nSize) const
+	{
 		using namespace silverbun;
 
 		uint32_t nOldProt = 0u;
@@ -548,6 +550,18 @@ public:
 		}
 
 		CallPVM(reinterpret_cast<void *>(ptr), nSize, nOldProt, &nOldProt);
+	}
+
+	bool IsMemoryReadable(const size_t nSize) const
+	{
+		using namespace silverbun;
+
+		MEMORY_BASIC_INFORMATION memInfo;
+		if (!CallQVM(reinterpret_cast<LPCVOID>(GetPtr()), &memInfo, sizeof(memInfo))) {
+			return false;
+		}
+
+		return memInfo.RegionSize >= nSize && memInfo.State & MEM_COMMIT && !(memInfo.Protect & PAGE_NOACCESS);
 	}
 
 	CMemory FindPattern(const char *const szPattern, const Direction searchDirect = Direction::DOWN, const int opCodesToScan = 512, const ptrdiff_t nOccurences = 1) const
