@@ -499,6 +499,22 @@ public:
 		CallPVM(reinterpret_cast<void *>(ptr), nSize, nOldProt, &nOldProt);
 	}
 
+	void PatchBytes(const uint8_t *const vOpcodeArray, const size_t nSize) const
+	{
+		using namespace silverbun;
+
+		uint32_t nOldProt = 0u;
+
+		CallPVM(reinterpret_cast<void *>(ptr), nSize, PAGE_EXECUTE_READWRITE, &nOldProt); // Patch page to be able to read and write to it.
+
+		for (size_t i = 0; i < nSize; i++)
+		{
+			*reinterpret_cast<uint8_t *>(ptr + i) = vOpcodeArray[i];
+		}
+
+		CallPVM(reinterpret_cast<void *>(ptr), nSize, nOldProt, &nOldProt);
+	}
+
 	void PatchBytes(const char *const szString) const
 	{
 		using namespace silverbun;
